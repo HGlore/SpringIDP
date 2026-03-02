@@ -26,7 +26,8 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin(
-        origins = {"http://localhost:5173", "http://192.168.23.58:5173"},
+        origins = {"http://localhost:3000", "http://192.168.23.58:3000",
+                "http://localhost:5173", "http://192.168.23.58:5173"},
         allowCredentials = "true")
 public class UserController {
 
