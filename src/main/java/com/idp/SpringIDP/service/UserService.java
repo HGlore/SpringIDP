@@ -3,6 +3,7 @@ package com.idp.SpringIDP.service;
 import com.idp.SpringIDP.dto.ImageDTO;
 import com.idp.SpringIDP.entity.Images;
 import com.idp.SpringIDP.entity.Users;
+import com.idp.SpringIDP.repo.DocumentRepo;
 import com.idp.SpringIDP.repo.ImageRepo;
 import com.idp.SpringIDP.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class UserService {
 
     @Autowired
     private ImageRepo imageRepo;
+
+    @Autowired
+    private DocumentRepo documentRepo;
 
     /*@Autowired
     private UsersRegistryKeyRepo registryKeyRepo;*/
@@ -61,7 +65,7 @@ public class UserService {
         return "401 Unauthorized";
     }
 
-    public Users getUserData(String companyID){
+    public Users getUserData(String companyID) {
         return userRepo.findByCompanyID(companyID);
     }
 
@@ -80,4 +84,6 @@ public class UserService {
 
         return new ImageDTO(storeDate, totalQueue, newImages, enteredImages);
     }
+
+    public
 }
