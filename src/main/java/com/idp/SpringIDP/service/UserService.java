@@ -84,6 +84,4 @@ public class UserService {
 
         return new ImageDTO(storeDate, totalQueue, newImages, enteredImages);
     }
-
-    public
 }
