@@ -23,6 +23,6 @@ public class Images {
     @Column(nullable = false, name = "stored_date")
     private String storedDate;
 
-    @Column(nullable = false, name = "archive")
+    @Column(nullable = false)
     private int archive;
 }

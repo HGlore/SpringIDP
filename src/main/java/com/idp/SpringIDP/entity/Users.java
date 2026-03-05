@@ -15,15 +15,15 @@ public class Users {
     @Column(nullable = false, name = "company_id")
     private String companyID;
 
-    @Column(nullable = false, name = "password")
+    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, name = "role")
+    @Column(nullable = false)
     private String role;
 
     @Column(nullable = false, name = "created_at")
     private String createdAt;
 
-    @Column(nullable = false, name = "archive")
+    @Column(nullable = false)
     private int archive;
 }

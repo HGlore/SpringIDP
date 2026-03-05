@@ -1,9 +1,12 @@
 package com.idp.SpringIDP.dto;
 
+import com.idp.SpringIDP.entity.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -30,5 +33,12 @@ public class DocumentDTO {
     private String timeDeparted;
     private String timeArrived;
     private String date;
-
+    private int status;
+    private int archive;
+    private Shipper shipper;
+    private Consignee consignee;
+    private BillTo billTo;
+    private Instructions instructions;
+    private Totals totals;
+    private List<Items> items;
 }

@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DocumentRepo extends JpaRepository<Document, Integer> {
 
-    Document findById(int id);
+    Document findByStoredImageTableID(int id);
 }

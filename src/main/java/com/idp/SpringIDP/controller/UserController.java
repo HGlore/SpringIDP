@@ -69,10 +69,10 @@ public class UserController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok("Logged out successfully");
+        return ResponseEntity.ok("200 OK");
     }
 
-    @GetMapping("/getImages")
+    @GetMapping("/images")
     public ResponseEntity<ImageDTO> getImages(@RequestParam String storedDate) throws Exception {
         System.out.println("Date Received: " + storedDate);
 

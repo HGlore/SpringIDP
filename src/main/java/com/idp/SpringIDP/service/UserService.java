@@ -70,7 +70,7 @@ public class UserService {
     }
 
     public ImageDTO getImagesOf(String storeDate) throws Exception {
-        List<Images> images = imageRepo.findByStoredDate(storeDate);
+        var images = imageRepo.findByStoredDate(storeDate);
 
         if (images == null || images.isEmpty()) {
             return new ImageDTO(storeDate, 0, 0, 0);
