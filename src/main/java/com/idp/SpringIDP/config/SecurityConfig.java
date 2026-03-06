@@ -55,7 +55,6 @@ public class SecurityConfig {
 //        provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
         return provider;
     }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

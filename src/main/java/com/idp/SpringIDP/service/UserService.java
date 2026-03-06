@@ -8,6 +8,7 @@ import com.idp.SpringIDP.repo.ImageRepo;
 import com.idp.SpringIDP.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -54,7 +55,18 @@ public class UserService {
         }
     }*/
 
-    public String verify(Users user) {
+    public Users verify(Users user) {
+        Authentication authentication =
+                authManager.authenticate(new UsernamePasswordAuthenticationToken(
+                        user.getCompanyID(), user.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return user;
+        }
+
+        throw new BadCredentialsException("401 Unauthorized");
+    }
+
+    public String getAuthToken(Users user) {
         Authentication authentication =
                 authManager.authenticate(new UsernamePasswordAuthenticationToken(
                         user.getCompanyID(), user.getPassword()));
@@ -62,7 +74,8 @@ public class UserService {
         if (authentication.isAuthenticated()) {
             return jwtService.generateToken(user.getCompanyID());
         }
-        return "401 Unauthorized";
+
+        throw new RuntimeException("401 Unauthorized");
     }
 
     public Users getUserData(String companyID) {
@@ -80,8 +93,8 @@ public class UserService {
                 .filter(img -> img.getStatus() == 0 && img.getAiResponse() == 1)
                 .count();
         int newImages = images.size();
-        int enteredImages = (int) images.stream().filter(img -> img.getStatus() == 1).count();
+        int billedImages = (int) images.stream().filter(img -> img.getStatus() == 2).count();
 
-        return new ImageDTO(storeDate, totalQueue, newImages, enteredImages);
+        return new ImageDTO(storeDate, totalQueue, newImages, billedImages);
     }
 }
