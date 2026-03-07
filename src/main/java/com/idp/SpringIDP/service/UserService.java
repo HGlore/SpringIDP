@@ -1,11 +1,8 @@
 package com.idp.SpringIDP.service;
 
 import com.idp.SpringIDP.dto.ImageDTO;
-import com.idp.SpringIDP.entity.Images;
-import com.idp.SpringIDP.entity.Users;
-import com.idp.SpringIDP.repo.DocumentRepo;
-import com.idp.SpringIDP.repo.ImageRepo;
-import com.idp.SpringIDP.repo.UserRepo;
+import com.idp.SpringIDP.entity.*;
+import com.idp.SpringIDP.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,12 +17,6 @@ import java.util.List;
 public class UserService {
     @Autowired
     private UserRepo userRepo;
-
-    @Autowired
-    private ImageRepo imageRepo;
-
-    @Autowired
-    private DocumentRepo documentRepo;
 
     /*@Autowired
     private UsersRegistryKeyRepo registryKeyRepo;*/
@@ -80,21 +71,5 @@ public class UserService {
 
     public Users getUserData(String companyID) {
         return userRepo.findByCompanyID(companyID);
-    }
-
-    public ImageDTO getImagesOf(String storeDate) throws Exception {
-        var images = imageRepo.findByStoredDate(storeDate);
-
-        if (images == null || images.isEmpty()) {
-            return new ImageDTO(storeDate, 0, 0, 0);
-        }
-
-        int totalQueue = (int) images.stream()
-                .filter(img -> img.getStatus() == 0 && img.getAiResponse() == 1)
-                .count();
-        int newImages = images.size();
-        int billedImages = (int) images.stream().filter(img -> img.getStatus() == 2).count();
-
-        return new ImageDTO(storeDate, totalQueue, newImages, billedImages);
     }
 }

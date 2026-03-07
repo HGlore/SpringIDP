@@ -14,8 +14,8 @@ public class Images {
     @Column(nullable = false, name = "image_name")
     private String imageName;
 
-    @Column(nullable = false, name = "status")
-    private int Status;
+    @Column(nullable = false)
+    private int status;
 
     @Column(nullable = false, name = "ai_response")
     private int aiResponse;

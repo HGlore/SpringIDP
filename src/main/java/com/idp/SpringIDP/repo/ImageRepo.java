@@ -1,7 +1,10 @@
 package com.idp.SpringIDP.repo;
 
+import com.idp.SpringIDP.entity.Document;
 import com.idp.SpringIDP.entity.Images;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,4 +13,10 @@ import java.util.List;
 public interface ImageRepo extends JpaRepository<Images, Integer> {
 
     List<Images> findByStoredDate(String storedDate);
+
+    @Query("SELECT i FROM Images i WHERE i.status = 0 AND i.aiResponse = 1 LIMIT 5")
+    List<Images> findTop5ByOrderByIdAsc();
+
+    @Query("SELECT i FROM Images i WHERE i.id = :id")
+    Images findById(@Param("id") int id);
 }
