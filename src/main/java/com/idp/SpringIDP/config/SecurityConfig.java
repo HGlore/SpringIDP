@@ -38,7 +38,7 @@ public class SecurityConfig {
         return http
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/login", "/register").permitAll()
+                        request.requestMatchers("/api/login", "/register").permitAll()
                                 .anyRequest().authenticated())
                 .cors(Customizer.withDefaults())
                 /*.httpBasic(Customizer.withDefaults())*/
@@ -55,6 +55,7 @@ public class SecurityConfig {
 //        provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
         return provider;
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

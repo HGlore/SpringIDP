@@ -3,14 +3,11 @@ package com.idp.SpringIDP.controller;
 import com.idp.SpringIDP.dto.DocumentDTO;
 import com.idp.SpringIDP.dto.ImageDTO;
 import com.idp.SpringIDP.dto.UserDTO;
-import com.idp.SpringIDP.entity.BillTo;
-import com.idp.SpringIDP.entity.Consignee;
 import com.idp.SpringIDP.entity.Document;
 import com.idp.SpringIDP.entity.Users;
 import com.idp.SpringIDP.service.*;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -19,13 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,27 +29,18 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final ImageService imageService;
-    private final DocumentService docService;
-    private final BillToService billToService;
-    private final ConsigneeService consigneeService;
-    private final InstructionsService instructionsService;
-    private final ItemsService itemsService;
-    private final ProductionService prodService;
-    private final ShipperService shipperService;
-    private final TotalsService totalsService;
 
-    @PostMapping("/login")
+    @PostMapping("/api/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Users user, HttpServletResponse response) {
 
         var verifiedUser = userService.verify(user);
 
         if (verifiedUser != null) {
-            String generatedToken = userService.getAuthToken(user);
+            String generatedToken = userService.getAuthToken(verifiedUser);
 
             ResponseCookie cookie = ResponseCookie.from("auth", generatedToken)
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(true)
                     .sameSite("Lax")
                     .path("/")
                     .maxAge(Duration.ofMinutes(30))
@@ -65,7 +49,7 @@ public class UserController {
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
             Map<String, Object> responseBody = new HashMap<>();
-            Users userData = userService.getUserData(user.getCompanyID());
+            Users userData = userService.getUserData(verifiedUser.getCompanyID());
             responseBody.put("companyID", userData.getCompanyID());
             responseBody.put("role", userData.getRole());
             responseBody.put("status", "200 OK");
@@ -75,7 +59,7 @@ public class UserController {
         throw new BadCredentialsException("401 Unauthorized");
     }
 
-    @PostMapping("/userout")
+    @PostMapping("api/user-out")
     public ResponseEntity<String> logout(HttpServletResponse response) {
 
         // Clear the 'auth' cookie by setting maxAge to 0
@@ -92,27 +76,7 @@ public class UserController {
         return ResponseEntity.ok("200 OK");
     }
 
-    @PostMapping("/images")
-    public ResponseEntity<ImageDTO> getImages(@RequestBody Map<String, Object> payload, Authentication authentication) throws Exception {
-
-        String storedDate = (String) payload.get("storedDate");
-        // map/deserialized json userData fom payload
-        ObjectMapper mapper = new ObjectMapper();
-        var user = mapper.convertValue(payload.get("user"), UserDTO.class); // converValue(fromValue, toValueType/class);
-        var userData = userService.getUserData(user.getCompanyID());
-
-        if (userData != null && authentication.isAuthenticated()) {
-            System.out.println("Date Received: " + storedDate);
-            System.out.println("CompanyID: " + userData.getCompanyID());
-
-            ImageDTO response = imageService.getImagesOf(storedDate);
-            return ResponseEntity.ok(response);
-        }
-
-        throw new BadCredentialsException("401 Unauthorized");
-    }
-
-    @GetMapping("/api/profile/image")
+    @GetMapping("/api/me/profile-image")
     public ResponseEntity<Resource> userProfile(Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -141,63 +105,13 @@ public class UserController {
     }
 
     @GetMapping("/api/me")
-    public ResponseEntity<UserDTO> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserDTO> checkAuth(Authentication authentication) {
 
-        if (userDetails != null) {
-            Users userData = userService.getUserData(userDetails.getUsername()); // username or companyID
+        if (authentication.isAuthenticated()) {
+            Users userData = userService.getUserData(authentication.getName()); // username or companyID
             return ResponseEntity.ok(new UserDTO(userData.getCompanyID(),
                     userData.getRole(), "200 OK"));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    @PostMapping("/request")
-    public ResponseEntity<?> assignedAnImage(Authentication authentication) {
-
-        if (authentication.isAuthenticated()) {
-            try {
-                imageService.requestImage(authentication.getName());
-                return ResponseEntity.ok("200 OK");
-            } catch (Exception err) {
-                throw new RuntimeException("403 Forbidden");
-            }
-        }
-
-        throw new BadCredentialsException("401 Unauthorized");
-    }
-
-    @PostMapping("/entry/data")
-    public ResponseEntity<List<DocumentDTO>> getEntryData(Authentication authentication) {
-
-        if (authentication.isAuthenticated()) {
-            List<DocumentDTO> dataDTO = new ArrayList<>();
-
-            var documentList = docService.getDocumentDataList(authentication.getName());
-
-            for (Document d : documentList) {
-                String imageName = imageService.getImageName(d.getStoredImageTableID());
-                var shipper = shipperService.getShipper(d.getShipperTableID());
-                var consignee = consigneeService.getConsignee(d.getConsigneeTableID());
-                var billTo = billToService.getBillTo(d.getBillToTableID());
-                var instructions = instructionsService.getInstruction(d.getInstructionTableID());
-                var totals = totalsService.getTotals(d.getTotalsTableID());
-                var itemsList = itemsService.getItemsList(d.getId());
-
-                dataDTO.add(new DocumentDTO(
-                        d,
-                        imageName,
-                        shipper,
-                        consignee,
-                        billTo,
-                        instructions,
-                        totals,
-                        itemsList
-                ));
-            }
-
-            return ResponseEntity.ok(dataDTO);
-        }
-
-        throw new BadCredentialsException("401 Unauthorized");
     }
 }

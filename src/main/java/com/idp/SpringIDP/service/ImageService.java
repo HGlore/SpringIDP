@@ -4,8 +4,11 @@ import com.idp.SpringIDP.dto.ImageDTO;
 import com.idp.SpringIDP.entity.Images;
 import com.idp.SpringIDP.repo.DocumentRepo;
 import com.idp.SpringIDP.repo.ImageRepo;
+import com.idp.SpringIDP.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -13,19 +16,44 @@ public class ImageService {
 
     private final ImageRepo imageRepo;
     private final DocumentRepo documentRepo;
+    private final UserRepo userRepo;
 
-    public ImageDTO getImagesOf(String storeDate) throws Exception {
+    public ImageDTO getImagesStatusOf(String storeDate, String companyID) throws Exception {
         var images = imageRepo.findByStoredDate(storeDate);
+        var user = userRepo.findByCompanyID(companyID);
 
         if (images == null || images.isEmpty()) {
             return new ImageDTO(storeDate, 0, 0, 0);
         }
+        int totalQueue = 0;
+        int newImages = 0;
+        int billedImages = 0;
 
-        int totalQueue = (int) images.stream()
-                .filter(img -> img.getStatus() == 0 && img.getAiResponse() == 1)
-                .count();
-        int newImages = images.size();
-        int billedImages = (int) images.stream().filter(img -> img.getStatus() == 2).count();
+        if ("Entry".equals(user.getRole())) {
+            newImages = (int) images.stream()
+                    .filter(img -> user.getCompanyID().equals(img.getAssignedTo())
+                            && img.getStatus() == 1 && img.getAiResponse() == 1 && img.getArchive() == 0)
+                    .count();
+
+            totalQueue = (int) images.stream()
+                    .filter(img -> img.getStatus() == 1 && user.getCompanyID().equals(img.getAssignedTo())
+                            && img.getAiResponse() == 1 && img.getArchive() == 0)
+                    .count();
+
+            billedImages = (int) images.stream().filter(img -> user.getCompanyID().equals(img.getAssignedTo())
+                            && img.getStatus() == 2 && img.getArchive() == 0)
+                    .count();
+
+        } else {
+            newImages = images.size();
+
+            totalQueue = (int) images.stream()
+                    .filter(img -> Arrays.asList(0, 1).contains(img.getStatus())
+                            && img.getAiResponse() == 1)
+                    .count();
+
+            billedImages = (int) images.stream().filter(img -> img.getStatus() == 2).count();
+        }
 
         return new ImageDTO(storeDate, totalQueue, newImages, billedImages);
     }
@@ -41,6 +69,7 @@ public class ImageService {
 
         for (Images img : imagesList) {
             img.setStatus(1); // 1 = assigned
+            img.setAssignedTo(companyID);
 
             var document = documentRepo.findByStoredImageTableID(img.getId());
             document.setCompanyID(companyID);

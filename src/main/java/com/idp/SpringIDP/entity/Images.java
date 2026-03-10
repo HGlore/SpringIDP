@@ -11,6 +11,9 @@ public class Images {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "assigned_to")
+    private String assignedTo;
+
     @Column(nullable = false, name = "image_name")
     private String imageName;
 

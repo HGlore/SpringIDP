@@ -14,6 +14,11 @@ public interface DocumentRepo extends JpaRepository<Document, Integer> {
 
     Document findByStoredImageTableID(int id);
 
-    @Query("SELECT d FROM Document d WHERE d.companyID = :companyID AND d.status = 1 ORDER BY d.id")
-    List<Document> findByCompanyID(@Param("companyID") String companyID);
+    @Query("SELECT COUNT(d) > 0 FROM Document d WHERE d.companyID = :companyID AND d.status = :status AND d.archive = 0")
+    boolean existsOngoingEntry(@Param("companyID") String companyID,
+                               @Param("status") int status);
+
+    @Query("SELECT d FROM Document d WHERE d.companyID = :companyID AND d.status = :status AND d.archive = 0")
+    List<Document> findByCompanyIDAndStatus(@Param("companyID") String companyID,
+                                            @Param("status") int status);
 }
