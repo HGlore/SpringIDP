@@ -5,7 +5,6 @@ import com.idp.SpringIDP.dto.ImageDTO;
 import com.idp.SpringIDP.entity.Document;
 import com.idp.SpringIDP.service.*;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.module.ResolutionException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -73,37 +71,83 @@ public class EntryController {
         throw new BadCredentialsException("401 Unauthorized");
     }
 
-    @GetMapping("/api/me/entries")
-    public ResponseEntity<List<DocumentDTO>> getEntryData(Authentication authentication) {
+    @GetMapping("/api/me/ids-entries")
+    public ResponseEntity<List<Integer>> getEntryIDs(Authentication authentication) {
 
         if (authentication.isAuthenticated()) {
-            List<DocumentDTO> dataDTO = new ArrayList<>();
-            String companyID = authentication.getName();
+            return ResponseEntity.ok(imageService.getEntriesIDs(authentication.getName()));
+        }
+        throw new BadCredentialsException("401 Unauthorized");
+    }
 
-            var documentList = docService.getForEntryList(companyID);
+    @GetMapping("/api/me/entries/{id}")
+    public ResponseEntity<DocumentDTO> getEntryData(@PathVariable Integer id, Authentication authentication) {
 
-            for (Document d : documentList) {
-                String imageName = imageService.getImageName(d.getStoredImageTableID());
-                var shipper = shipperService.getShipper(d.getShipperTableID());
-                var consignee = consigneeService.getConsignee(d.getConsigneeTableID());
-                var billTo = billToService.getBillTo(d.getBillToTableID());
-                var instructions = instructionsService.getInstruction(d.getInstructionTableID());
-                var totals = totalsService.getTotals(d.getTotalsTableID());
-                var itemsList = itemsService.getItemsList(d.getId());
+        if (authentication.isAuthenticated()) {
 
-                dataDTO.add(new DocumentDTO(
-                        d,
-                        imageName,
-                        shipper,
-                        consignee,
-                        billTo,
-                        instructions,
-                        totals,
-                        itemsList
-                ));
-            }
+            var document = docService.getForEntry(id);
+            String imageName = imageService.getImageName(document.getStoredImageTableID());
+            var shipper = shipperService.getShipper(document.getShipperTableID());
+            var consignee = consigneeService.getConsignee(document.getConsigneeTableID());
+            var billTo = billToService.getBillTo(document.getBillToTableID());
+            var instructions = instructionsService.getInstruction(document.getInstructionTableID());
+            var totals = totalsService.getTotals(document.getTotalsTableID());
+            var itemsList = itemsService.getItemsList(document.getId());
+
+            DocumentDTO dataDTO = new DocumentDTO(
+                    document,
+                    imageName,
+                    shipper,
+                    consignee,
+                    billTo,
+                    instructions,
+                    totals,
+                    itemsList
+            );
 
             return ResponseEntity.ok(dataDTO);
+        }
+
+        throw new BadCredentialsException("401 Unauthorized");
+    }
+
+    @PostMapping("/api/me/entries/batch")
+    public ResponseEntity<List<DocumentDTO>> getEntryDataBatch(@RequestBody List<Integer> ids, Authentication authentication) {
+
+        if (authentication.isAuthenticated()) {
+
+            var dataDTO = new ArrayList<DocumentDTO>();
+
+            System.out.println("IDS: " + ids);
+
+            for (Integer id : ids) {
+
+                var document = docService.getForEntry(id);
+
+                if (document.getEntryStatus() == 0) {
+
+                    String imageName = imageService.getImageName(document.getStoredImageTableID());
+                    var shipper = shipperService.getShipper(document.getShipperTableID());
+                    var consignee = consigneeService.getConsignee(document.getConsigneeTableID());
+                    var billTo = billToService.getBillTo(document.getBillToTableID());
+                    var instructions = instructionsService.getInstruction(document.getInstructionTableID());
+                    var totals = totalsService.getTotals(document.getTotalsTableID());
+                    var itemsList = itemsService.getItemsList(document.getId());
+
+                    dataDTO.add(new DocumentDTO(
+                            document,
+                            imageName,
+                            shipper,
+                            consignee,
+                            billTo,
+                            instructions,
+                            totals,
+                            itemsList
+                    ));
+
+                    return ResponseEntity.ok(dataDTO);
+                }
+            }
         }
 
         throw new BadCredentialsException("401 Unauthorized");
@@ -119,21 +163,29 @@ public class EntryController {
     private String imageDir;
 
     @GetMapping("/api/me/entry-image")
-    public ResponseEntity<Resource> getEntryImage(@RequestParam String imageName) {
-        try {
-            Path imagePath = Paths.get(imageDir).resolve(imageName);
+    public ResponseEntity<Resource> getEntryImage(@RequestParam String imageName, Authentication authentication) {
 
-            Resource resource = new UrlResource(imagePath.toUri());
-            if (!resource.exists()) {
-                return ResponseEntity.notFound().build();
+        System.out.println("Imagename: " + imageName);
+
+        if (authentication.isAuthenticated()) {
+            try {
+                Path imagePath = Paths.get(imageDir).resolve(imageName);
+                System.out.println("ImagePath:" + imagePath);
+
+                Resource resource = new UrlResource(imagePath.toUri());
+                if (!resource.exists()) {
+                    return ResponseEntity.notFound().build();
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(resource);
+
+            } catch (Exception e) {
+                return ResponseEntity.internalServerError().build();
             }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(resource);
-
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
         }
+
+        throw new BadCredentialsException("401 Unauthorized");
     }
 }

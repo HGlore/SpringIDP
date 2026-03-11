@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DocumentDTO {
-    public DocumentDTO(Document d,
+    public DocumentDTO(Document document,
                        String imageName,
                        Shipper shipper,
                        Consignee consignee,
@@ -22,31 +22,31 @@ public class DocumentDTO {
                        Totals totals,
                        List<Items> itemsList) {
 
-        this.id = d.getId();
+        this.id = document.getId();
         this.imageName = imageName;
-        this.companyID = d.getCompanyID();
-        this.startTime = d.getStartTime();
-        this.endTime = d.getEndTime();
-        this.image = d.getImage();
-        this.accountType = d.getAccountType();
-        this.detectedAccType = d.getDetectedAccType();
-        this.bolNumber = d.getBolNumber();
-        this.masterBolNumber = d.getMasterBolNumber();
-        this.poNumber = d.getPoNumber();
-        this.quoteNumber = d.getQuoteNumber();
-        this.terms = d.getTerms();
-        this.shipperNumber = d.getShipperNumber();
-        this.proNumber = d.getProNumber();
-        this.raNumber = d.getRaNumber();
-        this.eControlNumber = d.getEControlNumber();
-        this.driverNumber = d.getDriverNumber();
-        this.runNumber = d.getRunNumber();
-        this.cubicFeet = d.getCubicFeet();
-        this.timeDeparted = d.getTimeDeparted();
-        this.timeArrived = d.getTimeArrived();
-        this.date = d.getDate();
-        this.status = d.getStatus();
-        this.archive = d.getArchive();
+        this.companyID = document.getCompanyID();
+        this.startTime = document.getStartTime();
+        this.endTime = document.getEndTime();
+        this.image = document.getImage();
+        this.accountType = document.getAccountType();
+        this.detectedAccType = document.getDetectedAccType();
+        this.bolNumber = document.getBolNumber();
+        this.masterBolNumber = document.getMasterBolNumber();
+        this.poNumber = document.getPoNumber();
+        this.quoteNumber = document.getQuoteNumber();
+        this.terms = document.getTerms();
+        this.shipperNumber = document.getShipperNumber();
+        this.proNumber = document.getProNumber();
+        this.raNumber = document.getRaNumber();
+        this.eControlNumber = document.getEControlNumber();
+        this.driverNumber = document.getDriverNumber();
+        this.runNumber = document.getRunNumber();
+        this.cubicFeet = document.getCubicFeet();
+        this.timeDeparted = document.getTimeDeparted();
+        this.timeArrived = document.getTimeArrived();
+        this.date = document.getDate();
+        this.status = document.getStatus();
+        this.archive = document.getArchive();
 
         // Objects
         this.shipper = shipper;

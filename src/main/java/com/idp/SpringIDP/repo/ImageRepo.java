@@ -1,6 +1,5 @@
 package com.idp.SpringIDP.repo;
 
-import com.idp.SpringIDP.entity.Document;
 import com.idp.SpringIDP.entity.Images;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +18,8 @@ public interface ImageRepo extends JpaRepository<Images, Integer> {
 
     @Query("SELECT i FROM Images i WHERE i.id = :id")
     Images findById(@Param("id") int id);
+
+    @Query("SELECT i.id FROM Images i WHERE i.assignedTo = :assignedTo AND i.status = :status AND i.archive = 0")
+    List<Integer> findByAssignedToAndStatus(@Param("assignedTo") String companyID,
+                                            @Param("status") int status);
 }

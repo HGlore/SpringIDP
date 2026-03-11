@@ -6,8 +6,6 @@ import com.idp.SpringIDP.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
@@ -15,8 +13,8 @@ public class DocumentService {
     private final DocumentRepo documentRepo;
     private final UserRepo userRepo;
 
-    public List<Document> getForEntryList(String companyID) {
-        return documentRepo.findByCompanyIDAndStatus(companyID, 1);
+    public Document getForEntry(int id) {
+        return documentRepo.findByStoredImageTableIDAndStatus(id, 1);
     }
 
     public boolean isHaveOngoingForEntry(String companyID) {

@@ -59,7 +59,7 @@ public class UserController {
         throw new BadCredentialsException("401 Unauthorized");
     }
 
-    @PostMapping("api/user-out")
+    @PostMapping("/api/user-out")
     public ResponseEntity<String> logout(HttpServletResponse response) {
 
         // Clear the 'auth' cookie by setting maxAge to 0

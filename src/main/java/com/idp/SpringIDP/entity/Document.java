@@ -79,6 +79,9 @@ public class Document {
     @Column(nullable = false)
     private int status;
 
+    @Column(nullable = false, name = "entry_status")
+    private int entryStatus;
+
     @Column(nullable = false, name = "shipper_tbl_id")
     private int shipperTableID;
 

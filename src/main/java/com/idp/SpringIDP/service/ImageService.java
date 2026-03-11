@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +62,10 @@ public class ImageService {
     public String getImageName(int id) {
         var image = imageRepo.findById(id);
         return image.getImageName();
+    }
+
+    public List<Integer> getEntriesIDs(String companyID) {
+        return imageRepo.findByAssignedToAndStatus(companyID, 1);
     }
 
     /* void */
