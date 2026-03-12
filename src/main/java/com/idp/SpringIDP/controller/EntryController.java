@@ -2,7 +2,6 @@ package com.idp.SpringIDP.controller;
 
 import com.idp.SpringIDP.dto.DocumentDTO;
 import com.idp.SpringIDP.dto.ImageDTO;
-import com.idp.SpringIDP.entity.Document;
 import com.idp.SpringIDP.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -84,6 +84,8 @@ public class EntryController {
     public ResponseEntity<DocumentDTO> getEntryData(@PathVariable Integer id, Authentication authentication) {
 
         if (authentication.isAuthenticated()) {
+
+            System.out.println("Received ID: " + id);
 
             var document = docService.getForEntry(id);
             String imageName = imageService.getImageName(document.getStoredImageTableID());
@@ -170,18 +172,20 @@ public class EntryController {
         if (authentication.isAuthenticated()) {
             try {
                 Path imagePath = Paths.get(imageDir).resolve(imageName);
-                System.out.println("ImagePath:" + imagePath);
-
                 Resource resource = new UrlResource(imagePath.toUri());
+
                 if (!resource.exists()) {
                     return ResponseEntity.notFound().build();
                 }
 
+                String contentType = Files.probeContentType(imagePath);
+
                 return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
+                        .contentType(MediaType.parseMediaType(contentType))
                         .body(resource);
 
             } catch (Exception e) {
+                e.printStackTrace();
                 return ResponseEntity.internalServerError().build();
             }
         }
