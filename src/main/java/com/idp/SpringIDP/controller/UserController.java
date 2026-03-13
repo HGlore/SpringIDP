@@ -106,11 +106,17 @@ public class UserController {
 
     @GetMapping("/api/me")
     public ResponseEntity<UserDTO> checkAuth(Authentication authentication) {
+        try {
+            System.out.println("isCheckAuth: ");
 
-        if (authentication.isAuthenticated()) {
-            Users userData = userService.getUserData(authentication.getName()); // username or companyID
-            return ResponseEntity.ok(new UserDTO(userData.getCompanyID(),
-                    userData.getRole(), "200 OK"));
+            if (authentication.isAuthenticated()) {
+                Users userData = userService.getUserData(authentication.getName()); // username or companyID
+                return ResponseEntity.ok(new UserDTO(userData.getCompanyID(),
+                        userData.getRole(), "200 OK"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.ok(new UserDTO(null,
+                    null, "401"));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

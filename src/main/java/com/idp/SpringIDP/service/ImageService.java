@@ -8,6 +8,7 @@ import com.idp.SpringIDP.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.StyledEditorKit;
 import java.util.Arrays;
 import java.util.List;
 
@@ -62,6 +63,11 @@ public class ImageService {
     public String getImageName(int id) {
         var image = imageRepo.findById(id);
         return image.getImageName();
+    }
+
+    public String getStoredDate(int id) {
+        var image = imageRepo.findById(id);
+        return image.getStoredDate();
     }
 
     public List<Integer> getEntriesIDs(String companyID) {

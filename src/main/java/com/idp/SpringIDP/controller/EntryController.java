@@ -1,7 +1,9 @@
 package com.idp.SpringIDP.controller;
 
 import com.idp.SpringIDP.dto.DocumentDTO;
+import com.idp.SpringIDP.dto.EntriesBatchDTO;
 import com.idp.SpringIDP.dto.ImageDTO;
+import com.idp.SpringIDP.dto.OngoingEntriesDTO;
 import com.idp.SpringIDP.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,7 +60,8 @@ public class EntryController {
 
         if (authentication.isAuthenticated()) {
             try {
-                if (docService.isHaveOngoingForEntry(authentication.getName())) {
+                var checkEntries = docService.isHaveOngoingForEntry(authentication.getName());
+                if (checkEntries.isOngoing()) {
                     return ResponseEntity.ok("409 Conflict");
                 }
 
@@ -80,53 +84,63 @@ public class EntryController {
         throw new BadCredentialsException("401 Unauthorized");
     }
 
-    @GetMapping("/api/me/entries/{id}")
-    public ResponseEntity<DocumentDTO> getEntryData(@PathVariable Integer id, Authentication authentication) {
+    @GetMapping("/api/me/entries/{id}/{date}")
+    public ResponseEntity<DocumentDTO> getEntryData(@PathVariable Integer id, String date,
+                                                    Authentication authentication) {
+
+        System.out.println("ID: " + id + "\nDate: " + date);
 
         if (authentication.isAuthenticated()) {
-
-            System.out.println("Received ID: " + id);
-
             var document = docService.getForEntry(id);
-            String imageName = imageService.getImageName(document.getStoredImageTableID());
-            var shipper = shipperService.getShipper(document.getShipperTableID());
-            var consignee = consigneeService.getConsignee(document.getConsigneeTableID());
-            var billTo = billToService.getBillTo(document.getBillToTableID());
-            var instructions = instructionsService.getInstruction(document.getInstructionTableID());
-            var totals = totalsService.getTotals(document.getTotalsTableID());
-            var itemsList = itemsService.getItemsList(document.getId());
+            String storedDate = imageService.getStoredDate(document.getStoredImageTableID());
 
-            DocumentDTO dataDTO = new DocumentDTO(
-                    document,
-                    imageName,
-                    shipper,
-                    consignee,
-                    billTo,
-                    instructions,
-                    totals,
-                    itemsList
-            );
+            if (storedDate.equals(date)) {
 
-            return ResponseEntity.ok(dataDTO);
+                String imageName = imageService.getImageName(document.getStoredImageTableID());
+                var shipper = shipperService.getShipper(document.getShipperTableID());
+                var consignee = consigneeService.getConsignee(document.getConsigneeTableID());
+                var billTo = billToService.getBillTo(document.getBillToTableID());
+                var instructions = instructionsService.getInstruction(document.getInstructionTableID());
+                var totals = totalsService.getTotals(document.getTotalsTableID());
+                var itemsList = itemsService.getItemsList(document.getId());
+
+                DocumentDTO dataDTO = new DocumentDTO(
+                        document,
+                        imageName,
+                        shipper,
+                        consignee,
+                        billTo,
+                        instructions,
+                        totals,
+                        itemsList
+                );
+
+                return ResponseEntity.ok(dataDTO);
+            } else {
+                return ResponseEntity.ok(new DocumentDTO());
+            }
         }
 
         throw new BadCredentialsException("401 Unauthorized");
     }
 
     @PostMapping("/api/me/entries/batch")
-    public ResponseEntity<List<DocumentDTO>> getEntryDataBatch(@RequestBody List<Integer> ids, Authentication authentication) {
+    public ResponseEntity<List<DocumentDTO>> getEntryDataBatch(@RequestBody EntriesBatchDTO batchData,
+                                                               Authentication authentication) {
+
+        System.out.println("BatchDTO: " + batchData);
 
         if (authentication.isAuthenticated()) {
-
             var dataDTO = new ArrayList<DocumentDTO>();
-
-            System.out.println("IDS: " + ids);
+            var ids = batchData.getIds();
+            String date = batchData.getDate();
 
             for (Integer id : ids) {
 
                 var document = docService.getForEntry(id);
+                String storedDate = imageService.getStoredDate(document.getStoredImageTableID());
 
-                if (document.getEntryStatus() == 0) {
+                if (document.getEntryStatus() == 0 && storedDate.equals(date)) {
 
                     String imageName = imageService.getImageName(document.getStoredImageTableID());
                     var shipper = shipperService.getShipper(document.getShipperTableID());
@@ -148,6 +162,8 @@ public class EntryController {
                     ));
 
                     return ResponseEntity.ok(dataDTO);
+                } else {
+                    return ResponseEntity.ok(dataDTO);
                 }
             }
         }
@@ -156,7 +172,7 @@ public class EntryController {
     }
 
     @GetMapping("/api/me/ongoing")
-    public ResponseEntity<Boolean> checkForRequest(Authentication authentication) {
+    public ResponseEntity<OngoingEntriesDTO> checkForRequest(Authentication authentication) {
         String companyID = authentication.getName();
         return ResponseEntity.ok(docService.isHaveOngoingForEntry(companyID));
     }

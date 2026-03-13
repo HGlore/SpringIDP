@@ -22,4 +22,11 @@ public interface ImageRepo extends JpaRepository<Images, Integer> {
     @Query("SELECT i.id FROM Images i WHERE i.assignedTo = :assignedTo AND i.status = :status AND i.archive = 0")
     List<Integer> findByAssignedToAndStatus(@Param("assignedTo") String companyID,
                                             @Param("status") int status);
+
+    @Query("SELECT i.id FROM Images i WHERE i.assignedTo = :assignedTo AND storedDate = :storedDate AND i.status = 1 AND i.archive = 0")
+    Images findByStoredDateAndAssignedTo(@Param("assignedTo") String companyID,
+                                         @Param("storedDate") String storedDate);
+
+    @Query("SELECT i FROM Images i WHERE i.assignedTo = :assignedTo AND i.status = 1 AND i.archive = 0 LIMIT 1")
+    Images findByAssignedToWithStoredDate(@Param("assignedTo") String companyID);
 }

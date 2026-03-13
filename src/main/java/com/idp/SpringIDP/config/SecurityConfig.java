@@ -38,7 +38,7 @@ public class SecurityConfig {
         return http
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/api/login", "/register").permitAll()
+                        request.requestMatchers("/api/login", "/register", "/api/me").permitAll()
                                 .anyRequest().authenticated())
                 .cors(Customizer.withDefaults())
                 /*.httpBasic(Customizer.withDefaults())*/
@@ -66,7 +66,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000", "http://192.168.23.58:3000", "http://localhost:5173", "http://192.168.23.58:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("auth","Content-Type", "Authorization", "X-Requested-With"));
+        config.setAllowedHeaders(List.of("auth", "Content-Type", "Authorization", "X-Requested-With"));
         config.setAllowCredentials(true); // MUST for cookies
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

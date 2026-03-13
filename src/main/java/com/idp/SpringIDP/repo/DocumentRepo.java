@@ -1,6 +1,7 @@
 package com.idp.SpringIDP.repo;
 
 
+import com.idp.SpringIDP.dto.OngoingEntriesDTO;
 import com.idp.SpringIDP.entity.Document;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
