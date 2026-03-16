@@ -84,11 +84,10 @@ public class EntryController {
         throw new BadCredentialsException("401 Unauthorized");
     }
 
-    @GetMapping("/api/me/entries/{id}/{date}")
-    public ResponseEntity<DocumentDTO> getEntryData(@PathVariable Integer id, String date,
+    @GetMapping("/api/me/entries/{id}")
+    public ResponseEntity<DocumentDTO> getEntryData(@PathVariable Integer id,
+                                                    @RequestParam String date,
                                                     Authentication authentication) {
-
-        System.out.println("ID: " + id + "\nDate: " + date);
 
         if (authentication.isAuthenticated()) {
             var document = docService.getForEntry(id);
@@ -128,8 +127,6 @@ public class EntryController {
     public ResponseEntity<List<DocumentDTO>> getEntryDataBatch(@RequestBody EntriesBatchDTO batchData,
                                                                Authentication authentication) {
 
-        System.out.println("BatchDTO: " + batchData);
-
         if (authentication.isAuthenticated()) {
             var dataDTO = new ArrayList<DocumentDTO>();
             var ids = batchData.getIds();
@@ -162,10 +159,9 @@ public class EntryController {
                     ));
 
                     return ResponseEntity.ok(dataDTO);
-                } else {
-                    return ResponseEntity.ok(dataDTO);
                 }
             }
+            return ResponseEntity.ok(new ArrayList<>());
         }
 
         throw new BadCredentialsException("401 Unauthorized");
@@ -182,8 +178,6 @@ public class EntryController {
 
     @GetMapping("/api/me/entry-image")
     public ResponseEntity<Resource> getEntryImage(@RequestParam String imageName, Authentication authentication) {
-
-        System.out.println("Imagename: " + imageName);
 
         if (authentication.isAuthenticated()) {
             try {
