@@ -70,6 +70,10 @@ public class ImageService {
         return image.getStoredDate();
     }
 
+    public Images getImageData(int id) {
+        return imageRepo.findById(id);
+    }
+
     public List<Integer> getEntriesIDs(String companyID) {
         return imageRepo.findByAssignedToAndStatus(companyID, 1);
     }
@@ -89,5 +93,12 @@ public class ImageService {
             documentRepo.save(document);
             imageRepo.save(img);
         }
+    }
+
+    public void updateToBilledStatus(int id) {
+        var image = imageRepo.findById(id);
+        image.setStatus(2);
+
+        imageRepo.save(image);
     }
 }

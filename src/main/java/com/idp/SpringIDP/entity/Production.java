@@ -17,8 +17,8 @@ public class Production {
     @Column(nullable = false, name = "document_tbl_id")
     private int documentTableID;
 
-    @Column(nullable = false, name = "user_id")
-    private int userID;
+    @Column(nullable = false, name = "company_id")
+    private String companyID;
 
     @Column(nullable = false, name = "production_date")
     private String productionDate;

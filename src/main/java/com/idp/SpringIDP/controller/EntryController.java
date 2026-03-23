@@ -1,9 +1,7 @@
 package com.idp.SpringIDP.controller;
 
-import com.idp.SpringIDP.dto.DocumentDTO;
-import com.idp.SpringIDP.dto.EntriesBatchDTO;
-import com.idp.SpringIDP.dto.ImageDTO;
-import com.idp.SpringIDP.dto.OngoingEntriesDTO;
+import com.idp.SpringIDP.dto.*;
+import com.idp.SpringIDP.entity.Production;
 import com.idp.SpringIDP.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -198,6 +196,56 @@ public class EntryController {
                 e.printStackTrace();
                 return ResponseEntity.internalServerError().build();
             }
+        }
+
+        throw new BadCredentialsException("401 Unauthorized");
+    }
+
+    @PostMapping("/api/me/entries")
+    public ResponseEntity<String> storeDataEntries(@RequestBody EntriesDTO entriesDTO,
+                                                   Authentication authentication) {
+
+        System.out.println("Received EntriesDTO: " + entriesDTO);
+
+        if (authentication.isAuthenticated()) {
+
+            docService.putDocumentData(entriesDTO.getDocumentDTO());
+            shipperService.putShipperData(entriesDTO.getDocumentDTO().getShipper());
+            consigneeService.putConsigneeData(entriesDTO.getDocumentDTO().getConsignee());
+            billToService.putBillToData(entriesDTO.getDocumentDTO().getBillTo());
+            instructionsService.putInstructionsData(entriesDTO.getDocumentDTO().getInstructions());
+            totalsService.putTotalsData(entriesDTO.getDocumentDTO().getTotals());
+            itemsService.putItemsData(entriesDTO.getDocumentDTO().getItems(),
+                    entriesDTO.getDocumentDTO().getId());
+
+            if (entriesDTO.getIds().isEmpty() || "WAIT".equals(entriesDTO.getUpdateTo())) {
+                // update entry_status of documentTable to pending/waiting until batch is finish entered
+                docService.updateToWaitStatus(entriesDTO.getDocumentDTO().getId());
+                System.out.println("WaitStatus: " + entriesDTO.getDocumentDTO().getId());
+
+            } else {
+                for (Integer id : entriesDTO.getIds()) {
+                    docService.updateToBilledStatus(id); // update documentStatus to billed
+                    imageService.updateToBilledStatus(id); // update imageStatus to billed
+                    System.out.println("BilledStatus: " + entriesDTO.getIds());
+
+                }
+            }
+
+            return ResponseEntity.ok("200 OK");
+        }
+
+        throw new BadCredentialsException("401 Unauthorized");
+    }
+
+    @PostMapping("/api/me/productions")
+    public ResponseEntity<String> storeProductionData(@RequestBody Production prodData,
+                                                      Authentication authentication) {
+
+        if (authentication.isAuthenticated()) {
+            prodService.putProductionData(prodData);
+
+            return ResponseEntity.ok("200 OK");
         }
 
         throw new BadCredentialsException("401 Unauthorized");

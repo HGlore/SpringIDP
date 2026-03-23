@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DocumentRepo extends JpaRepository<Document, Integer> {
 
+    Document findById(int id);
+
     Document findByStoredImageTableID(int id);
 
     @Query("SELECT COUNT(d) > 0 FROM Document d WHERE d.companyID = :companyID AND d.status = :status AND d.archive = 0")

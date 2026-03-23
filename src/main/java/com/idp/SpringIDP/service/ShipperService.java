@@ -16,4 +16,18 @@ public class ShipperService {
         return shipperRepo.findById(id);
     }
 
+    /* void */
+    public void putShipperData(Shipper shipperData) {
+        var shipper = shipperRepo.findById(shipperData.getId());
+        shipper.setName(shipperData.getName());
+        shipper.setContactName(shipperData.getContactName());
+        shipper.setPhone(shipperData.getPhone());
+        shipper.setAddressLine1(shipperData.getAddressLine1());
+        shipper.setAddressLine2(shipperData.getAddressLine2());
+        shipper.setCity(shipperData.getCity());
+        shipper.setState(shipperData.getState());
+        shipper.setZipCode(shipperData.getZipCode());
+
+        shipperRepo.save(shipper);
+    }
 }

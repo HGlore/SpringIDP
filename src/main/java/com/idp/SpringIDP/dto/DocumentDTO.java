@@ -23,6 +23,7 @@ public class DocumentDTO {
                        List<Items> itemsList) {
 
         this.id = document.getId();
+        this.imageID = document.getStoredImageTableID();
         this.imageName = imageName;
         this.companyID = document.getCompanyID();
         this.startTime = document.getStartTime();
@@ -58,6 +59,7 @@ public class DocumentDTO {
     }
 
     private int id;
+    private int imageID;
     private String imageName;
     private String companyID;
     private String startTime;

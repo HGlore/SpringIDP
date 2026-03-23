@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ItemsRepo extends JpaRepository<Items, Integer> {
     List<Items> findByDocumentTableID(int id);
+
+    Items findById(int id);
 }

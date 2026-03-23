@@ -16,4 +16,18 @@ public class BillToService {
         return billToRepo.findById(id);
     }
 
+    /* void */
+    public void putBillToData(BillTo billToData) {
+        var billTo = billToRepo.findById(billToData.getId());
+        billTo.setName(billToData.getName());
+        billTo.setContactName(billToData.getContactName());
+        billTo.setPhone(billToData.getPhone());
+        billTo.setAddressLine1(billToData.getAddressLine1());
+        billTo.setAddressLine2(billToData.getAddressLine2());
+        billTo.setCity(billToData.getCity());
+        billTo.setState(billToData.getState());
+        billTo.setZipCode(billToData.getZipCode());
+
+        billToRepo.save(billTo);
+    }
 }

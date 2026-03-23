@@ -13,10 +13,10 @@ public interface ImageRepo extends JpaRepository<Images, Integer> {
 
     List<Images> findByStoredDate(String storedDate);
 
-    @Query("SELECT i FROM Images i WHERE i.status = 0 AND i.aiResponse = 1 LIMIT 5")
+    @Query("SELECT i FROM Images i WHERE i.status = 0 AND i.aiResponse = 1 AND i.archive = 0 LIMIT 5")
     List<Images> findTop5ByOrderByIdAsc();
 
-    @Query("SELECT i FROM Images i WHERE i.id = :id")
+    @Query("SELECT i FROM Images i WHERE i.id = :id AND i.archive = 0")
     Images findById(@Param("id") int id);
 
     @Query("SELECT i.id FROM Images i WHERE i.assignedTo = :assignedTo AND i.status = :status AND i.archive = 0")
