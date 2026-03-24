@@ -3,6 +3,8 @@ package com.idp.SpringIDP.controller;
 import com.idp.SpringIDP.dto.*;
 import com.idp.SpringIDP.entity.Production;
 import com.idp.SpringIDP.service.*;
+import io.jsonwebtoken.security.Request;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -13,6 +15,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -202,10 +205,10 @@ public class EntryController {
     }
 
     @PostMapping("/api/me/entries")
-    public ResponseEntity<String> storeDataEntries(@RequestBody EntriesDTO entriesDTO,
-                                                   Authentication authentication) {
-
-        System.out.println("Received EntriesDTO: " + entriesDTO);
+    public ResponseEntity<String> storeDataEntries(
+            @RequestBody EntriesDTO entriesDTO,
+            Authentication authentication
+    ) {
 
         if (authentication.isAuthenticated()) {
 
@@ -221,13 +224,11 @@ public class EntryController {
             if (entriesDTO.getIds().isEmpty() || "WAIT".equals(entriesDTO.getUpdateTo())) {
                 // update entry_status of documentTable to pending/waiting until batch is finish entered
                 docService.updateToWaitStatus(entriesDTO.getDocumentDTO().getId());
-                System.out.println("WaitStatus: " + entriesDTO.getDocumentDTO().getId());
 
             } else {
                 for (Integer id : entriesDTO.getIds()) {
                     docService.updateToBilledStatus(id); // update documentStatus to billed
                     imageService.updateToBilledStatus(id); // update imageStatus to billed
-                    System.out.println("BilledStatus: " + entriesDTO.getIds());
 
                 }
             }
