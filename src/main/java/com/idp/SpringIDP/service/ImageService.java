@@ -1,16 +1,21 @@
 package com.idp.SpringIDP.service;
 
+import com.idp.SpringIDP.dto.BilledTimeDTO;
 import com.idp.SpringIDP.dto.ImageDTO;
 import com.idp.SpringIDP.entity.Images;
+import com.idp.SpringIDP.entity.Production;
 import com.idp.SpringIDP.repo.DocumentRepo;
 import com.idp.SpringIDP.repo.ImageRepo;
 import com.idp.SpringIDP.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.StyledEditorKit;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,12 +25,16 @@ public class ImageService {
     private final DocumentRepo documentRepo;
     private final UserRepo userRepo;
 
+    private final ProductionService productionService;
+
+    private final List<BilledTimeDTO> billedTimeDTOList = new ArrayList<>();
+
     public ImageDTO getImagesStatusOf(String storeDate, String companyID) throws Exception {
         var images = imageRepo.findByStoredDate(storeDate);
         var user = userRepo.findByCompanyID(companyID);
 
         if (images == null || images.isEmpty()) {
-            return new ImageDTO(storeDate, 0, 0, 0);
+            return new ImageDTO(storeDate, 0, 0, 0, null);
         }
         int totalQueue = 0;
         int newImages = 0;
@@ -46,6 +55,9 @@ public class ImageService {
                             && img.getStatus() == 2 && img.getArchive() == 0)
                     .count();
 
+            var prodList = productionService.getProdListPerBiller(companyID, storeDate);
+            storeTimeBilled(prodList);
+
         } else {
             newImages = images.size();
 
@@ -55,10 +67,14 @@ public class ImageService {
                     .count();
 
             billedImages = (int) images.stream().filter(img -> img.getStatus() == 2).count();
+
+            var prodList = productionService.getAllProdList(storeDate);
+            storeTimeBilled(prodList);
         }
 
-        return new ImageDTO(storeDate, totalQueue, newImages, billedImages);
+        return new ImageDTO(storeDate, totalQueue, newImages, billedImages, billedTimeDTOList);
     }
+
 
     public String getImageName(int id) {
         var image = imageRepo.findById(id);
@@ -76,6 +92,31 @@ public class ImageService {
 
     public List<Integer> getEntriesIDs(String companyID) {
         return imageRepo.findByAssignedToAndStatus(companyID, 1);
+    }
+
+    /* private */
+    private String DateFormatter(LocalTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h a");
+        return dateTime.format(formatter);
+    }
+
+    private void storeTimeBilled(List<Production> prodList) {
+        for (var prod : prodList) {
+            String formattedTime = DateFormatter(prod.getCreatedAt());
+            Optional<BilledTimeDTO> existedTime = billedTimeDTOList.stream()
+                    .filter(t -> t.getTime().equals(formattedTime))
+                    .findFirst();
+
+            if (existedTime.isPresent()) {
+                existedTime.get().setBilled(
+                        existedTime.get().getBilled() + 1);
+            } else {
+                BilledTimeDTO newDTO = new BilledTimeDTO();
+                newDTO.setTime(formattedTime);
+                newDTO.setBilled(1);
+                billedTimeDTOList.add(newDTO);
+            }
+        }
     }
 
     /* void */

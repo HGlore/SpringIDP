@@ -36,4 +36,7 @@ public class Production {
 
     @Column(nullable = false)
     private String comment;
+
+    @Column(nullable = false, name = "created_at")
+    private LocalTime createdAt;
 }

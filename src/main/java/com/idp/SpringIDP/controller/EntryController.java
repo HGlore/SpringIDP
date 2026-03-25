@@ -211,21 +211,35 @@ public class EntryController {
     ) {
 
         if (authentication.isAuthenticated()) {
+            var document = entriesDTO.getDocumentDTO();
+            var shipper = entriesDTO.getDocumentDTO().getShipper();
+            var consignee = entriesDTO.getDocumentDTO().getConsignee();
+            var billTo = entriesDTO.getDocumentDTO().getBillTo();
+            var instruction = entriesDTO.getDocumentDTO().getInstructions();
+            var totals = entriesDTO.getDocumentDTO().getTotals();
+            var items = entriesDTO.getDocumentDTO().getItems();
 
-            docService.putDocumentData(entriesDTO.getDocumentDTO());
-            shipperService.putShipperData(entriesDTO.getDocumentDTO().getShipper());
-            consigneeService.putConsigneeData(entriesDTO.getDocumentDTO().getConsignee());
-            billToService.putBillToData(entriesDTO.getDocumentDTO().getBillTo());
-            instructionsService.putInstructionsData(entriesDTO.getDocumentDTO().getInstructions());
-            totalsService.putTotalsData(entriesDTO.getDocumentDTO().getTotals());
-            itemsService.putItemsData(entriesDTO.getDocumentDTO().getItems(),
-                    entriesDTO.getDocumentDTO().getId());
+            var companyID = authentication.getName();
+            var production = entriesDTO.getProductionDTO();
+            production.setCompanyID(companyID);
+            production.setDocumentTableID(document.getId());
+
+            docService.putDocumentData(document);
+            shipperService.putShipperData(shipper);
+            consigneeService.putConsigneeData(consignee);
+            billToService.putBillToData(billTo);
+            instructionsService.putInstructionsData(instruction);
+            totalsService.putTotalsData(totals);
+            itemsService.putItemsData(items, document.getId());
+            prodService.putProductionData(production);
 
             if (entriesDTO.getIds().isEmpty() || "WAIT".equals(entriesDTO.getUpdateTo())) {
                 // update entry_status of documentTable to pending/waiting until batch is finish entered
                 docService.updateToWaitStatus(entriesDTO.getDocumentDTO().getId());
 
             } else {
+                docService.updateToWaitStatus(entriesDTO.getDocumentDTO().getId());
+
                 for (Integer id : entriesDTO.getIds()) {
                     docService.updateToBilledStatus(id); // update documentStatus to billed
                     imageService.updateToBilledStatus(id); // update imageStatus to billed
@@ -239,7 +253,7 @@ public class EntryController {
         throw new BadCredentialsException("401 Unauthorized");
     }
 
-    @PostMapping("/api/me/productions")
+    /*@PostMapping("/api/me/productions")
     public ResponseEntity<String> storeProductionData(@RequestBody Production prodData,
                                                       Authentication authentication) {
 
@@ -250,5 +264,5 @@ public class EntryController {
         }
 
         throw new BadCredentialsException("401 Unauthorized");
-    }
+    }*/
 }

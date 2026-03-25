@@ -3,11 +3,13 @@ package com.idp.SpringIDP.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 public class ImageDTO {
 
-    public ImageDTO(String storeDate){
+    public ImageDTO(String storeDate) {
         this.storeDate = storeDate;
     }
 
@@ -15,4 +17,5 @@ public class ImageDTO {
     private int totalQueue;
     private int newImages;
     private int billedImages;
+    private List<BilledTimeDTO> billedTimeDTOList;
 }

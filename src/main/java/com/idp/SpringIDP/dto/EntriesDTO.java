@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class EntriesDTO {
     private DocumentDTO documentDTO;
+    private ProductionDTO productionDTO;
     private List<Integer> ids;
     private String updateTo;
 }
