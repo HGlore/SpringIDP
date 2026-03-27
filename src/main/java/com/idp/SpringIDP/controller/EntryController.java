@@ -221,8 +221,6 @@ public class EntryController {
 
             var companyID = authentication.getName();
             var production = entriesDTO.getProductionDTO();
-            production.setCompanyID(companyID);
-            production.setDocumentTableID(document.getId());
 
             docService.putDocumentData(document);
             shipperService.putShipperData(shipper);
@@ -231,7 +229,7 @@ public class EntryController {
             instructionsService.putInstructionsData(instruction);
             totalsService.putTotalsData(totals);
             itemsService.putItemsData(items, document.getId());
-            prodService.putProductionData(production);
+            prodService.putProductionData(production, companyID, document.getId());
 
             if (entriesDTO.getIds().isEmpty() || "WAIT".equals(entriesDTO.getUpdateTo())) {
                 // update entry_status of documentTable to pending/waiting until batch is finish entered
@@ -241,9 +239,10 @@ public class EntryController {
                 docService.updateToWaitStatus(entriesDTO.getDocumentDTO().getId());
 
                 for (Integer id : entriesDTO.getIds()) {
-                    docService.updateToBilledStatus(id); // update documentStatus to billed
+                    docService.updateToBilledStatus(id, companyID); // update documentStatus to billed
                     imageService.updateToBilledStatus(id); // update imageStatus to billed
-
+                    prodService.updateProductionStatus(
+                            id, companyID, production.getProductionDate(), 2);
                 }
             }
 

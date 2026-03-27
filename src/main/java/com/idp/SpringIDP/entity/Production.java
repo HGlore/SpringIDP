@@ -3,7 +3,10 @@ package com.idp.SpringIDP.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
@@ -23,20 +26,22 @@ public class Production {
     @Column(nullable = false, name = "production_date")
     private String productionDate;
 
-    @JsonFormat(pattern = "HH:mm:ss")
     @Column(nullable = false, name = "start_time")
-    private LocalTime startTime;
+    private LocalDateTime startTime;
 
-    @JsonFormat(pattern = "HH:mm:ss")
     @Column(nullable = false, name = "end_time")
-    private LocalTime endTime;
+    private LocalDateTime endTime;
 
     @Column(nullable = false)
-    private int status;
+    private int status = 1;
 
     @Column(nullable = false)
-    private String comment;
+    private String comment = "NO COMMENT";
 
-    @Column(nullable = false, name = "created_at")
-    private LocalTime createdAt;
+    @Column(nullable = false)
+    private int archive;
+
+    @Column(nullable = false, updatable = false, name = "created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }

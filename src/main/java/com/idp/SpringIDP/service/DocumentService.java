@@ -40,6 +40,7 @@ public class DocumentService {
     public void putDocumentData(DocumentDTO documentDTO) {
 
         var document = documentRepo.findByStoredImageTableID(documentDTO.getId());
+
         document.setStartTime(documentDTO.getStartTime());
         document.setEndTime(documentDTO.getEndTime());
         document.setImage(documentDTO.getImage());
@@ -71,8 +72,8 @@ public class DocumentService {
         documentRepo.save(document);
     }
 
-    public void updateToBilledStatus(int id) {
-        var document = documentRepo.findByStoredImageTableID(id);
+    public void updateToBilledStatus(int id, String companyID) {
+        var document = documentRepo.findByStoredImageTableIDAndCompanyID(id, companyID);
         document.setStatus(2);
 
         documentRepo.save(document);

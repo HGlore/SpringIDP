@@ -14,7 +14,7 @@ public class ImageDTO {
     }
 
     private String storeDate;
-    private int totalQueue;
+    private int unbilledImages;
     private int newImages;
     private int billedImages;
     private List<BilledTimeDTO> billedTimeDTOList;
