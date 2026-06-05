@@ -57,17 +57,17 @@ public class EntryController {
     }
 
     @PostMapping("/api/me/assignments")
-    public ResponseEntity<String> assignedAnImage(Authentication authentication) {
+    public ResponseEntity<AssignedResult> assignedAnImage(Authentication authentication) {
 
         if (authentication.isAuthenticated()) {
             try {
                 var checkEntries = docService.isHaveOngoingForEntry(authentication.getName());
                 if (checkEntries.isOngoing()) {
-                    return ResponseEntity.ok("409 Conflict");
+                    return ResponseEntity.ok(new AssignedResult(0, "409 Conflict"));
                 }
 
-                imageService.requestImage(authentication.getName());
-                return ResponseEntity.ok("200 OK");
+                int imageCount = imageService.requestImage(authentication.getName());
+                return ResponseEntity.ok(new AssignedResult(imageCount, "200 OK"));
             } catch (Exception err) {
                 throw new RuntimeException("403 Forbidden");
             }

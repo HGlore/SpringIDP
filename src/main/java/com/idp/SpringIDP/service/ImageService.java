@@ -128,10 +128,9 @@ public class ImageService {
         }
     }
 
-    /* void */
-    public void requestImage(String companyID) {
+    public int requestImage(String companyID) {
         var imagesList = imageRepo.findTop5ByOrderByIdAsc();
-
+        System.out.println("IMAGE HEHEEHEHEHEHEHHE " + imagesList.size());
         for (Images img : imagesList) {
             img.setStatus(1); // 1 = assigned
             img.setAssignedTo(companyID);
@@ -143,8 +142,10 @@ public class ImageService {
             documentRepo.save(document);
             imageRepo.save(img);
         }
+        return imagesList.size();
     }
 
+    /* void */
     public void updateToBilledStatus(int id) {
         var image = imageRepo.findById(id);
         image.setStatus(2);
