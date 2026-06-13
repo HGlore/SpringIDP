@@ -1,8 +1,6 @@
 package com.idp.SpringIDP.controller;
 
-import com.idp.SpringIDP.dto.DocumentDTO;
-import com.idp.SpringIDP.dto.ImageDTO;
-import com.idp.SpringIDP.dto.UserDTO;
+import com.idp.SpringIDP.dto.*;
 import com.idp.SpringIDP.entity.Document;
 import com.idp.SpringIDP.entity.Users;
 import com.idp.SpringIDP.service.*;
@@ -30,6 +28,33 @@ public class UserController {
 
     private final UserService userService;
 
+    @PostMapping("/api/register")
+    public ResponseEntity<RegResponseDTO> register(@RequestBody RegisterDTO registry) {
+
+        try {
+            boolean verifiedKey = userService.verifyKey(registry.getRegKey());
+
+            if (verifiedKey) {
+                userService.register(registry);
+
+                RegResponseDTO registered = new RegResponseDTO();
+                Users newUser = userService.getUserData(registry.getCompanyID());
+                registered.setCompanyID(newUser.getCompanyID());
+                registered.setSuccess(true);
+                registered.setMessage("200 OK");
+                return ResponseEntity.ok(registered);
+            }
+
+            RegResponseDTO registryFailed = new RegResponseDTO();
+            registryFailed.setSuccess(false);
+            registryFailed.setMessage("401 Unauthorized");
+            return ResponseEntity.ok(registryFailed);
+
+        } catch (Exception e) {
+            throw new RuntimeException("500 Internal Server Error");
+        }
+    }
+
     @PostMapping("/api/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Users user, HttpServletResponse response) {
 
@@ -51,6 +76,7 @@ public class UserController {
             Map<String, Object> responseBody = new HashMap<>();
             Users userData = userService.getUserData(verifiedUser.getCompanyID());
             responseBody.put("companyID", userData.getCompanyID());
+            responseBody.put("userStatus", userData.getStatus());
             responseBody.put("role", userData.getRole());
             responseBody.put("status", "200 OK");
             return ResponseEntity.ok(responseBody);
@@ -65,7 +91,7 @@ public class UserController {
         // Clear the 'auth' cookie by setting maxAge to 0
         ResponseCookie cookie = ResponseCookie.from("auth", "")
                 .httpOnly(true)
-                .secure(false) // same as login
+                .secure(true) // same as login
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(0) // expire immediately

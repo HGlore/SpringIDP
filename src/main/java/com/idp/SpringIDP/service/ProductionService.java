@@ -58,4 +58,8 @@ public class ProductionService {
         production.setStatus(status);
         productionRepo.save(production);
     }
+
+    public List<Production> getProductionStatus(String prodDate, String companyID) {
+        return productionRepo.getProductionStatus(prodDate, companyID);
+    }
 }

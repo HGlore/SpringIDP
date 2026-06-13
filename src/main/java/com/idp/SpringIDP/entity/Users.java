@@ -4,6 +4,9 @@ package com.idp.SpringIDP.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "users_tbl")
@@ -19,10 +22,13 @@ public class Users {
     private String password;
 
     @Column(nullable = false)
+    private int status;
+
+    @Column(nullable = false)
     private String role;
 
-    @Column(nullable = false, name = "created_at")
-    private String createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     private int archive;

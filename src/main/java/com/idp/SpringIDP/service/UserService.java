@@ -1,9 +1,12 @@
 package com.idp.SpringIDP.service;
 
 import com.idp.SpringIDP.dto.ImageDTO;
+import com.idp.SpringIDP.dto.RegisterDTO;
 import com.idp.SpringIDP.entity.*;
 import com.idp.SpringIDP.repo.*;
+import org.hibernate.ReadOnlyMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,10 +14,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class UserService {
+
+    private final String registryKey = "f.sox.4545";
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+
     @Autowired
     private UserRepo userRepo;
 
@@ -27,24 +35,24 @@ public class UserService {
     @Autowired
     AuthenticationManager authManager;
 
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-
-    /*public UserResponseDTO register(UsersRegistryKeyDTO userDTO) {
-
-        RegistryKey key = registryKeyRepo.findByRegistryKey(userDTO.getKey());
-        if (key == null) {
-            throw new RuntimeException("Invalid registry key");
-        } else {
-
+    public void register(RegisterDTO registry) {
+        try {
             // Map to Users for DTO
-            Users user = new Users();
-            user.setUsername(userDTO.getUsername());
-            user.setPassword(encoder.encode(userDTO.getPassword()));
-            repo.save(user);
+            Users newUser = new Users();
+            newUser.setCompanyID(registry.getCompanyID());
+            newUser.setRole(registry.getRole());
+            newUser.setPassword(encoder.encode(registry.getPassword()));
+            userRepo.save(newUser);
 
-            return new UserResponseDTO(user.getUsername(), "200 OK");
+        } catch (Exception e) {
+            System.out.println("Error : hererere" + e.getMessage());
+            throw new RuntimeException("500 Internal Server Error" + e.getMessage());
         }
-    }*/
+    }
+
+    public boolean verifyKey(String regKey) {
+        return regKey.equals(registryKey);
+    }
 
     public Users verify(Users user) {
         Authentication authentication =
@@ -71,5 +79,13 @@ public class UserService {
 
     public Users getUserData(String companyID) {
         return userRepo.findByCompanyID(companyID);
+    }
+
+    public List<Users> getAllUsers() {
+        return userRepo.findAll();
+    }
+
+    public List<Users> getFilteredUsers(int status) {
+        return userRepo.findByStatus(status);
     }
 }

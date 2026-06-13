@@ -29,4 +29,12 @@ public interface ProductionRepo extends JpaRepository<Production, Integer> {
             @Param("documentTableID") int documentTableID,
             @Param("companyID") String companyID,
             @Param("productionDate") String storeDate);
+
+    @Query("SELECT p FROM Production p " +
+            "WHERE p.productionDate = :productionDate " +
+            "AND p.companyID = :companyID " +
+            "AND p.archive = 0")
+    List<Production> getProductionStatus(
+            @Param("productionDate") String prodDate,
+            @Param("companyID") String companyID);
 }

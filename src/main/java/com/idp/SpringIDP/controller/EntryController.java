@@ -1,10 +1,8 @@
 package com.idp.SpringIDP.controller;
 
 import com.idp.SpringIDP.dto.*;
-import com.idp.SpringIDP.entity.Production;
+import com.idp.SpringIDP.entity.Users;
 import com.idp.SpringIDP.service.*;
-import io.jsonwebtoken.security.Request;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -15,13 +13,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +28,7 @@ import java.util.Map;
         allowCredentials = "true")
 public class EntryController {
 
+    private final UserService userService;
     private final ImageService imageService;
     private final DocumentService docService;
     private final BillToService billToService;
@@ -247,6 +245,48 @@ public class EntryController {
             }
 
             return ResponseEntity.ok("200 OK");
+        }
+
+        throw new BadCredentialsException("401 Unauthorized");
+    }
+
+    @GetMapping("/api/me/production/{status}")
+    public ResponseEntity<List<UserStatusDTO>> getBillersStatus(@PathVariable Integer status,
+                                                                @RequestParam String date,
+                                                                Authentication authentication) {
+        if (authentication.isAuthenticated()) {
+
+            var dtoList = new ArrayList<UserStatusDTO>();
+            List<Users> users = null;
+
+            if (List.of(0, 1, 2).contains(status)) {
+                users = userService.getFilteredUsers(status);
+            } else {
+                users = userService.getAllUsers();
+            }
+
+            for (var user : users) {
+
+                if (!user.getRole().equals("Entry")) continue;
+
+                int billed = 0;
+                int outputted = 0;
+
+                var userProdList = prodService.getProductionStatus(date, user.getCompanyID());
+                for (var prodData : userProdList) {
+                    billed = prodData.getStatus() == 2 ? (billed + 1) : billed;
+                    outputted = prodData.getStatus() == 3 ? (outputted + 1) : outputted;
+                }
+
+                var newDTO = new UserStatusDTO();
+                newDTO.setId(user.getId());
+                newDTO.setCompanyID(user.getCompanyID());
+                newDTO.setStatus(user.getStatus());
+                newDTO.setBilled(billed);
+                newDTO.setOutputted(outputted);
+                dtoList.add(newDTO);
+            }
+            return ResponseEntity.ok(dtoList);
         }
 
         throw new BadCredentialsException("401 Unauthorized");
